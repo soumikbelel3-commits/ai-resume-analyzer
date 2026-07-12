@@ -1,0 +1,13 @@
+{
+  "ignore": [
+    "node_modules",
+    ".next",
+    "out",
+    "build",
+    "coverage",
+    "package-lock.json",
+    "pnpm-lock.yaml",
+    "yarn.lock",
+    "prisma/migrations"
+  ]
+}

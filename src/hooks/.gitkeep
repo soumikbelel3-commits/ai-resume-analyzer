@@ -1,0 +1,4 @@
+/**
+ * Shared React hooks live here.
+ * Prefer feature-local hooks under `src/features/<feature>/hooks` when possible.
+ */

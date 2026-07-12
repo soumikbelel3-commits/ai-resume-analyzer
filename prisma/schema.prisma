@@ -1,0 +1,122 @@
+// Prisma schema for AI Resume Analyzer (single-user, no auth).
+// SQLite for zero-config local development; swap provider to postgresql for production.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum ResumeStatus {
+  UPLOADED
+  PARSING
+  PARSED
+  ANALYZED
+  FAILED
+}
+
+enum SkillCategory {
+  TECHNICAL
+  SOFT
+  TOOL
+  LANGUAGE
+  OTHER
+}
+
+enum AnalysisType {
+  ATS
+  REVIEW
+  JOB_MATCH
+  BULLET_OPTIMIZE
+  FULL
+}
+
+model Resume {
+  id           String       @id @default(cuid())
+  fileName     String
+  originalName String
+  mimeType     String
+  fileSize     Int
+  storagePath  String
+  rawText      String?
+  parsedData   Json?
+  status       ResumeStatus @default(UPLOADED)
+  version      Int          @default(1)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  analyses        ResumeAnalysis[]
+  skills          Skill[]
+  jobDescriptions JobDescription[]
+
+  @@index([createdAt])
+  @@index([status])
+}
+
+model ResumeAnalysis {
+  id              String       @id @default(cuid())
+  resumeId        String
+  type            AnalysisType @default(FULL)
+  overallScore    Float?
+  sectionScores   Json?
+  strengths       Json?
+  weaknesses      Json?
+  suggestions     Json?
+  grammarIssues   Json?
+  atsIssues       Json?
+  missingInfo     Json?
+  writingQuality  Json?
+  matchPercentage Float?
+  matchingSkills  Json?
+  missingSkills   Json?
+  missingKeywords Json?
+  rawResponse     Json?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  resume          Resume           @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  jobDescription  JobDescription?
+
+  @@index([resumeId])
+  @@index([type])
+  @@index([createdAt])
+}
+
+model JobDescription {
+  id                String   @id @default(cuid())
+  resumeId          String
+  analysisId        String?  @unique
+  title             String?
+  company           String?
+  rawText           String
+  extractedSkills   Json?
+  extractedKeywords Json?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  resume   Resume          @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  analysis ResumeAnalysis? @relation(fields: [analysisId], references: [id], onDelete: SetNull)
+
+  @@index([resumeId])
+  @@index([createdAt])
+}
+
+model Skill {
+  id        String        @id @default(cuid())
+  resumeId  String
+  name      String
+  category  SkillCategory @default(OTHER)
+  confidence Float        @default(1)
+  source    String        @default("parsed")
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  resume Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+
+  @@unique([resumeId, name])
+  @@index([resumeId])
+  @@index([category])
+}

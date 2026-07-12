@@ -1,0 +1,4 @@
+/**
+ * Feature modules (upload, parser, ats, matching, etc.) will live here.
+ * Each feature owns its components, hooks, services, and types.
+ */

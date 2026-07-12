@@ -1,0 +1,4 @@
+/**
+ * Shared cross-feature services (e.g. AI client wrappers) live here.
+ * Prefer feature-local services under `src/features/<feature>/services` when possible.
+ */
