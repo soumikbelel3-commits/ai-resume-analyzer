@@ -1,0 +1,5 @@
+# Binary test fixtures must never go through line-ending conversion.
+# core.autocrlf=true would otherwise rewrite LF to CRLF on checkout and
+# corrupt these files for anyone cloning on Windows, including CI.
+*.pdf  binary
+*.docx binary
