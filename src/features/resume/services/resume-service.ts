@@ -16,6 +16,7 @@ import { db } from "@/lib/db";
 import {
   isAcceptedMimeType,
   MAX_UPLOAD_BYTES,
+  MAX_UPLOAD_MB,
   saveUpload,
 } from "@/lib/storage";
 import type { ParsedResume } from "@/types/resume";
@@ -44,7 +45,11 @@ export async function createResumeFromUpload(file: File) {
   }
 
   if (file.size > MAX_UPLOAD_BYTES) {
-    throw new AppError("File must be 5MB or smaller.", 400, "FILE_TOO_LARGE");
+    throw new AppError(
+      `File must be ${MAX_UPLOAD_MB}MB or smaller.`,
+      400,
+      "FILE_TOO_LARGE",
+    );
   }
 
   const bytes = Buffer.from(await file.arrayBuffer());

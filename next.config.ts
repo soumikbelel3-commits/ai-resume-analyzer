@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ["pdfjs-dist", "@prisma/client", "prisma"],
   experimental: {
     serverActions: {
-      bodySizeLimit: "6mb",
+      bodySizeLimit: "5mb",
     },
   },
 };
