@@ -1,3 +1,4 @@
+import { latestScoredAnalysis } from "@/features/resume/services/analysis-selection";
 import { jsonError, jsonOk } from "@/lib/api";
 import { db } from "@/lib/db";
 
@@ -8,10 +9,7 @@ export async function GET() {
     const resumes = await db.resume.findMany({
       orderBy: { createdAt: "desc" },
       include: {
-        analyses: {
-          orderBy: { createdAt: "desc" },
-          take: 1,
-        },
+        analyses: latestScoredAnalysis,
         _count: { select: { skills: true, analyses: true } },
       },
     });
