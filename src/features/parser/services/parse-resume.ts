@@ -4,30 +4,8 @@ import mammoth from "mammoth";
 
 import { isAiConfigured, generateStructured } from "@/lib/ai";
 import { parseResumeHeuristically } from "@/features/parser/services/heuristic-parser";
+import { extractPdfText } from "@/features/parser/services/pdf-text";
 import { parsedResumeSchema, type ParsedResume } from "@/types/resume";
-
-async function extractPdfText(buffer: Buffer): Promise<string> {
-  // Dynamic import keeps pdfjs out of edge bundles and avoids SSR canvas issues.
-  const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
-
-  const loadingTask = pdfjs.getDocument({
-    data: new Uint8Array(buffer),
-    useSystemFonts: true,
-  });
-  const pdf = await loadingTask.promise;
-  const pages: string[] = [];
-
-  for (let i = 1; i <= pdf.numPages; i += 1) {
-    const page = await pdf.getPage(i);
-    const content = await page.getTextContent();
-    const text = content.items
-      .map((item) => ("str" in item ? item.str : ""))
-      .join(" ");
-    pages.push(text);
-  }
-
-  return pages.join("\n");
-}
 
 async function extractDocxText(buffer: Buffer): Promise<string> {
   const result = await mammoth.extractRawText({ buffer });
