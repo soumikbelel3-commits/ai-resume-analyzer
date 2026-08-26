@@ -7,6 +7,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { FileUp, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
+import { MAX_UPLOAD_BYTES, MAX_UPLOAD_MB } from "@/lib/upload-limits";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -65,8 +67,8 @@ export default function UploadPage() {
     (files: File[]) => {
       const file = files[0];
       if (!file) return;
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error("File must be 5MB or smaller");
+      if (file.size > MAX_UPLOAD_BYTES) {
+        toast.error(`File must be ${MAX_UPLOAD_MB}MB or smaller`);
         return;
       }
       mutation.mutate(file);
@@ -86,7 +88,8 @@ export default function UploadPage() {
       <div>
         <h1 className="text-3xl font-semibold tracking-tight">Upload resume</h1>
         <p className="text-muted-foreground mt-1">
-          PDF or DOCX up to 5MB. Parsing and ATS scoring run automatically.
+          PDF or DOCX up to {MAX_UPLOAD_MB}MB. Parsing and ATS scoring run
+          automatically.
         </p>
       </div>
 

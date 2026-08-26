@@ -31,13 +31,12 @@ export async function deleteUpload(storagePath: string) {
   }
 }
 
-export const ACCEPTED_MIME_TYPES = [
-  "application/pdf",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-] as const;
-
-export const MAX_UPLOAD_BYTES = 5 * 1024 * 1024; // 5MB
-
-export function isAcceptedMimeType(mimeType: string) {
-  return (ACCEPTED_MIME_TYPES as readonly string[]).includes(mimeType);
-}
+// Upload constraints live in `upload-limits` so the browser can read them too:
+// this module is `server-only`, which is why the upload page previously kept
+// its own hard-coded copy of the limit.
+export {
+  ACCEPTED_MIME_TYPES,
+  MAX_UPLOAD_BYTES,
+  MAX_UPLOAD_MB,
+  isAcceptedMimeType,
+} from "@/lib/upload-limits";
