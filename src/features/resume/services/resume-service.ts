@@ -9,6 +9,7 @@ import {
   extractTextFromFile,
   parseResumeText,
 } from "@/features/parser/services/parse-resume";
+import { isParseEmpty } from "@/features/parser/services/parse-quality";
 import { reviewResume } from "@/features/review/services/resume-reviewer";
 import { AppError } from "@/lib/api";
 import { db } from "@/lib/db";
@@ -78,7 +79,31 @@ export async function parseAndAnalyzeResume(resumeId: string) {
     const fs = await import("fs/promises");
     const buffer = await fs.readFile(resume.storagePath);
     const rawText = await extractTextFromFile(buffer, resume.mimeType);
+
+    if (!rawText.trim()) {
+      throw new AppError(
+        "No text could be read from this file. Scanned or image-only PDFs have no text layer — export a text-based PDF, or upload a DOCX instead.",
+        422,
+        "NO_TEXT_EXTRACTED",
+      );
+    }
+
     const parsed = await parseResumeText(rawText);
+
+    // Text came through but no section was understood. Scoring this would
+    // invent a number, so the resume is kept for reference and refused.
+    if (isParseEmpty(parsed)) {
+      await db.resume.update({
+        where: { id: resumeId },
+        data: { rawText, parsedData: parsed as Prisma.InputJsonValue },
+      });
+      throw new AppError(
+        "We read this file but could not identify any skills, experience or education in it. This usually means an unusual layout — try uploading a DOCX, or a version with plain section headings.",
+        422,
+        "PARSE_EMPTY",
+      );
+    }
+
     const ats = scoreAts(rawText, parsed);
 
     await db.skill.deleteMany({ where: { resumeId } });

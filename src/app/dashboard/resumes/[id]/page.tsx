@@ -204,13 +204,23 @@ export default function ResumeDetailPage() {
             <h1 className="text-3xl font-semibold tracking-tight">
               {data.originalName}
             </h1>
-            <Badge variant="secondary">{data.status}</Badge>
+            <Badge
+              variant={data.status === "FAILED" ? "destructive" : "secondary"}
+            >
+              {data.status}
+            </Badge>
           </div>
-          <p className="text-muted-foreground">
-            {data.parsedData?.name ?? "Parsed candidate"} ·{" "}
-            {data.parsedData?.email ?? "No email"} · ATS{" "}
-            {ats?.overallScore ?? "—"}
-          </p>
+          {data.status === "FAILED" ? (
+            <p className="text-muted-foreground">
+              This resume could not be analysed.
+            </p>
+          ) : (
+            <p className="text-muted-foreground">
+              {data.parsedData?.name ?? "Parsed candidate"} ·{" "}
+              {data.parsedData?.email ?? "No email"} · ATS{" "}
+              {ats?.overallScore ?? "—"}
+            </p>
+          )}
         </div>
         <div className="flex flex-wrap gap-2">
           <Button
@@ -239,6 +249,35 @@ export default function ResumeDetailPage() {
           </Button>
         </div>
       </div>
+
+      {data.status === "FAILED" ? (
+        <Card className="border-destructive/50">
+          <CardHeader>
+            <CardTitle className="text-base">
+              We could not read this resume
+            </CardTitle>
+            <CardDescription>
+              {data.rawText
+                ? "Text was extracted, but no skills, experience or education could be identified — usually an unusual layout. No score is shown, because scoring this would invent one."
+                : "No text could be read at all. Scanned or image-only PDFs have no text layer to extract."}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="text-muted-foreground space-y-2 text-sm">
+            <p>What usually helps:</p>
+            <ul className="list-inside list-disc space-y-1">
+              <li>Upload a DOCX instead of a PDF.</li>
+              <li>
+                Export a text-based PDF rather than a scan or a photo of a
+                printout.
+              </li>
+              <li>
+                Use plain section headings such as Skills, Experience and
+                Education.
+              </li>
+            </ul>
+          </CardContent>
+        </Card>
+      ) : null}
 
       <Tabs defaultValue="overview">
         <TabsList className="flex h-auto flex-wrap">
